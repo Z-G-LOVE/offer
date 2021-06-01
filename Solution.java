@@ -3,10 +3,7 @@ package 剑指offer;
 import org.junit.Test;
 
 import javax.swing.tree.TreeNode;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Stack;
+import java.util.*;
 
 /**
  * @author : one者天下
@@ -439,5 +436,242 @@ public class Solution {
         System.out.println(Integer.MAX_VALUE);
         System.out.println(NumberOf1(-1234567));
         System.out.println(-1 & 1);
+    }
+    @Test
+    public void testDouble(){
+        double num = 2.00000;
+        double res = (1/num) * (1/num);
+        System.out.println(res);
+    }
+
+    /**
+     * 给定一个double类型的浮点数base和int类型的整数exponent。求base的exponent次方。
+     * @param base 乘数
+     * @param exponent 阶方
+     * @return 返回 base的exponent次方
+     */
+    public double Power(double base, int exponent) {
+        if (base == 0) return 0;
+        if (exponent < 0) {
+            exponent = -exponent;
+            base = 1 / base;
+        }
+        return helpPower(base,exponent);
+    }
+
+    /**
+     * 递归实现n次阶方
+     * @param base 乘数
+     * @param exponent 阶方
+     * @return 返回base 的 exponent 次阶方
+     */
+    private double helpPower(double base,int exponent){
+        if (exponent == 0) return 1;
+        double res = helpPower(base,exponent >> 1);
+        if ((exponent&1) == 1) return res * res * base;
+        return res * res;
+    }
+
+    /**
+     * 拆解法解决阶方问题
+     * @param base 乘数
+     * @param exponent 阶方
+     * @return 返回 base 的 exponent 次阶方
+     */
+    public double power(double base,int exponent){
+        if (exponent == 0) return 1;
+        if (base == 0) return 0;
+        if (exponent < 0) {
+            exponent = -exponent;
+            base = 1 / base;
+        }
+        double res = 1.0;
+        double x = base;
+        while (exponent != 0){
+            if ((exponent&1) == 1){
+                res *= x;
+            }
+            x *= x;
+            exponent = exponent >> 1;
+        }
+        return res;
+    }
+
+    @Test
+    public void testPower(){
+        double base = 2.10000;
+        int exponent = 3;
+        System.out.println(power(base,exponent));
+        System.out.println(Power(base,exponent));
+    }
+
+    /**
+     * 调整数组顺序使奇数位于偶数前面
+     * @param array 需要调整的数组
+     * @return 返回一个按要求排列的数组
+     */
+    public int[] reOrderArray (int[] array) {
+        ArrayList<Integer> odd = new ArrayList<>();
+        ArrayList<Integer> even = new ArrayList<>();
+        for (int i : array) {
+            if ((i & 1) == 1) odd.add(i);
+            else even.add(i);
+        }
+        for (int i = 0; i < odd.size(); i++) {
+            array[i] = odd.get(i);
+        }
+        for (int i = odd.size(),j = 0; j < even.size(); j++,i++) {
+            array[i] = even.get(j);
+        }
+        return array;
+    }
+
+    /**
+     * 插入法解决调整数组顺序使奇数位于偶数前面
+     * @param array 需要调整的数组
+     * @return 返回按要求排列的数组
+     */
+    public int[] ReOrderArray(int[] array){
+        for (int i = 0; i < array.length; i++) {
+            if ((array[i]&1) == 0) continue;
+            int temp = i;
+            int tempValue  = array[i];
+            while (i>0 && (array[i-1]&1)==0){
+                array[i] = array[i-1];
+                i--;
+            }
+            if(temp != i){
+                array[i] = tempValue;
+                i = temp;
+            }
+        }
+        return array;
+    }
+
+    /**
+     * 使用头尾指针解决调整数组顺序使奇数位于偶数前面
+     * @param array 需要调整的数组
+     * @return 返回按要求排列的数组
+     */
+    public int[] ReOrderArrayHeardTail(int[] array){
+        int[] res = new int[array.length];
+        int head = 0;// 头指针
+        int tail = array.length-1; // 尾指针
+        int resHead = head; // 结果数组的头指针
+        int resTail = tail; // 结果数组的尾指针
+        while (head < array.length && tail >= 0){
+            if ((array[head] & 1) == 1){
+                res[resHead] = array[head];
+                resHead ++ ;
+            }
+            head ++;
+            if ((array[tail] & 1) == 0){
+                res[resTail] = array[tail];
+                resTail -- ;
+            }
+            tail --;
+        }
+        return res;
+    }
+    @Test
+    public void testReOrderArray(){
+        int[] arrays = new int[]{2,4,5,6,7,4,5,22,46,3};
+//        int[] ints = reOrderArray(arrays);
+        int[] ints1 = ReOrderArray(arrays);
+//        System.out.println(Arrays.toString(ints));
+        System.out.println(Arrays.toString(ints1));
+        int[] ints = ReOrderArrayHeardTail(arrays);
+        System.out.println(Arrays.toString(ints));
+    }
+
+    /**
+     * 链表中倒数第k个结点
+     * @param pHead 链表的头指针
+     * @param k 倒数的n个节点
+     * @return 返回倒数的n个节点的值
+     */
+    public ListNode FindKthToTail (ListNode pHead, int k) {
+        if (pHead == null) return null;
+        int length = listLength(pHead);
+        if (length < k) return null;
+        else if (length == k) return pHead;
+        int index = length - k + 1;
+        int i = 1;
+        ListNode temp = pHead;
+        while (i < index){
+            temp = temp.next;
+            i ++;
+        }
+        return temp;
+    }
+
+    /**
+     * 递归实现合并两个排序的链表
+     * @param pHead 链表的头指针
+     * @param k 倒数第k个节点
+     * @return 返回链表的倒数第k个节点的值
+     */
+    public ListNode findKthToTail(ListNode pHead,int k){
+        ListNode temp = pHead;
+        for (int i = 0; i < k; i++) {
+            if (temp == null) return null;
+            temp = temp.next;
+        }
+        ListNode res = pHead;
+        while (temp != null){
+            temp = temp.next;
+            res = res.next;
+        }
+        return res;
+    }
+    /**
+     * 链表的长度
+     * @param head 链表的头指针
+     * @return 返回链表的长度
+     */
+    private static int listLength(ListNode head){
+        ListNode temp = head;
+        int length = 0;
+        while (temp != null){
+            length ++;
+            temp = temp.next;
+        }
+        return length;
+    }
+    @Test
+    public void testListLength(){
+        ListNode head = new ListNode(0);
+        head.next = new ListNode(0);
+        head.next.next = new ListNode(0);
+        int listLength = listLength(head);
+        System.out.println(listLength);
+    }
+    @Test
+    public void testFindKthToTail(){
+        ListNode head = new ListNode(0);
+        head.next = new ListNode(1);
+        head.next.next = new ListNode(2);
+        head.next.next.next = new ListNode(3);
+        ListNode listNode = FindKthToTail(head, 2);
+        System.out.println(listNode.val);
+        ListNode kthToTail = findKthToTail(head, 2);
+        System.out.println(kthToTail.val);
+    }
+
+    /**
+     * 递归实现合并两个排序的链表
+     * @param list1 链表一
+     * @param list2 链表二
+     * @return 返回合并后的链表
+     */
+    public ListNode Merge(ListNode list1,ListNode list2) {
+        if (list1 == null || list2 == null) return list1 == null ? list2 : list1;
+        else if (list1.val <= list2.val) {
+            list1.next = Merge(list1.next,list2);
+            return list1;
+        }else{
+            list2.next = Merge(list1,list2.next);
+            return list2;
+        }
     }
 }
