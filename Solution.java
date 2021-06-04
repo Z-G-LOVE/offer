@@ -2,7 +2,6 @@ package 剑指offer;
 
 import org.junit.Test;
 
-import javax.swing.tree.TreeNode;
 import java.util.*;
 
 /**
@@ -673,5 +672,348 @@ public class Solution {
             list2.next = Merge(list1,list2.next);
             return list2;
         }
+    }
+
+    /**
+     * 树的子结构
+     * @param root1 大树
+     * @param root2 小树
+     * @return 返回小树是否为大树的子结构
+     */
+    public boolean HasSubtree(TreeNode root1,TreeNode root2) {
+        if (root1 == null || root2 == null) return false;
+        return helpHasSubtree(root1,root2) || HasSubtree(root1.left,root2) || HasSubtree(root1.right,root2);
+    }
+
+    /**
+     * 判断两棵树是否结构一样
+     * @param root1 树一
+     * @param root2 树二
+     * @return 返回boolean
+     */
+    private boolean helpHasSubtree(TreeNode root1,TreeNode root2){
+        if (root2 == null) return true;
+        if (root1 == null) return false;
+        if (root1.val != root2.val ) return false;
+        return helpHasSubtree(root1.left,root2.left) && helpHasSubtree(root1.right,root2.right);
+    }
+    public TreeNode Mirror (TreeNode pRoot) {
+        if (pRoot == null) return null;
+        return  helpMirror(pRoot);
+    }
+    private TreeNode helpMirror(TreeNode pRoot){
+        if (pRoot == null) return null;
+        TreeNode left = helpMirror(pRoot.left);
+        pRoot.left = helpMirror(pRoot.right);
+        pRoot.right = left;
+        return pRoot;
+    }
+
+    /**
+     * 顺时针打印矩阵
+     * @param matrix 数组
+     * @return 返回顺时针打印的集合
+     */
+    public ArrayList<Integer> printMatrix(int [][] matrix) {
+        if (matrix == null) return new ArrayList<Integer>();
+        ArrayList<Integer> list = new ArrayList<>();
+        if (matrix.length == 1 && matrix[0].length == 1)  {
+            list.add(matrix[0][0]);
+            return list;
+        }
+        boolean[][] mat = new boolean[matrix.length][matrix[0].length];
+        LinkedList<Integer> queue = new LinkedList<>();
+        int rowLength = matrix.length;
+        int colLength = matrix[0].length;
+        queue.add(-1);
+        queue.add(0);
+        queue.add(1);
+        queue.add(2);
+        int count = 0;
+        int rowLeft  = 0;
+        int colDown = matrix[0].length-1;
+        int rowRight = matrix.length-1;
+        int colUp = 0;
+        while (count < rowLength * colLength){
+            int dir = queue.poll();
+            if (dir == -1 && rowLeft < rowLength){
+                for (int i = 0; i < matrix[0].length; i++) {
+                    if (mat[rowLeft][i]) continue;
+                    list.add(matrix[rowLeft][i]);
+                    mat[rowLeft][i] = true;
+                    count ++;
+                }
+                queue.addLast(dir);
+                rowLeft++;
+            }else if (dir == 0 && colDown >=0){
+                for (int i = 0; i < matrix.length ; i++) {
+                    if (mat[i][colDown]) continue;
+                    list.add(matrix[i][colDown]);
+                    mat[i][colDown] = true;
+                    count ++ ;
+                }
+                queue.addLast(dir);
+                colDown--;
+            }else if (dir == 1 &&  rowRight >= 0){
+                for (int i = colLength-1; i >= 0 ; i--) {
+                    if (mat[rowRight][i]) continue;
+                    list.add(matrix[rowRight][i]);
+                    mat[rowRight][i] = true;
+                    count ++;
+                }
+                queue.addLast(dir);
+                rowRight--;
+            }else if (colUp < colLength){
+                for (int i = matrix.length - 1; i >= 0  ; i--) {
+                    if (mat[i][colUp]) continue;
+                    list.add(matrix[i][colUp]);
+                    mat[i][colUp] = true;
+                    count ++;
+                }
+                queue.addLast(dir);
+                colUp ++ ;
+            }
+        }
+        return list;
+    }
+    @Test
+    public void testPrintMatrix(){
+        int[][] arr = new int[][]{
+                {1,2,3,4}
+//                {5,6,7,8},
+//                {9,10,11,12},
+//                {13,14,15,16}
+        };
+        ArrayList<Integer> list = printMatrix(arr);
+        System.out.println(list);
+    }
+
+    /**
+     * @author one者天下
+     * 创建一个包含min函数的栈
+     * 定义栈的数据结构，请在该类型中实现一个能够得到栈中所含最小元素的min函数（时间复杂度应为O（1））
+     */
+    private static class NewStack{
+        private final Stack<Integer> stack1 = new Stack<>();
+        private final Stack<Integer> stack2 = new Stack<>();
+        private final Stack<Integer> stack3 = new Stack<>();
+        public void push(int node) {
+            stack3.push(node);
+            if (stack1.isEmpty()) stack1.push(node);
+            else if (node <= stack1.peek()){
+                stack1.push(node);
+            }else {
+                while (!stack1.isEmpty() && node > stack1.peek()){
+                    stack2.push(stack1.pop());
+                }
+                stack1.push(node);
+                while (!stack2.isEmpty()){
+                    stack1.push(stack2.pop());
+                }
+            }
+        }
+
+        public void pop() {
+            if (!stack3.isEmpty()){
+                Integer popValue = stack3.pop();
+                while (!stack1.isEmpty() && !stack1.peek().equals(popValue)){
+                    stack2.push(stack1.pop());
+                }
+                if (!stack1.isEmpty()) stack1.pop();
+                while (!stack2.isEmpty()) stack1.push(stack2.pop());
+            }
+            else throw new RuntimeException("栈为空");
+        }
+
+        public int top() {
+            return stack3.peek();
+        }
+
+        public int min() {
+            return stack1.peek();
+        }
+    }
+    @Test
+    public void testNewStack(){
+        NewStack newStack = new NewStack();
+        newStack.push(3);
+        System.out.println(newStack.min());
+        newStack.push(4);
+        System.out.println(newStack.min());
+        newStack.push(2);
+        System.out.println(newStack.min());
+        newStack.push(3);
+        System.out.println(newStack.min());
+        newStack.pop();
+        System.out.println(newStack.min());
+        newStack.pop();
+        System.out.println(newStack.min());
+        newStack.pop();
+        System.out.println(newStack.min());
+        newStack.push(0);
+        System.out.println(newStack.min());
+    }
+
+    /**
+     * 栈的压入、弹出序列
+     * @param pushA 压栈顺序
+     * @param popA 弹栈顺序
+     * @return 返回是否弹栈的顺序是否为栈的弹出顺序
+     */
+    public boolean IsPopOrder(int [] pushA,int [] popA) {
+        if (pushA.length != popA.length ||popA.length == 0) return false;
+        Stack<Integer> stack = new Stack<>();
+        int j = 0;
+        for (int item : pushA) {
+            stack.push(item);
+            while (!stack.isEmpty() && stack.peek() == popA[j]){
+                stack.pop();
+                j++;
+            }
+        }
+        return stack.isEmpty();
+    }
+    @Test
+    public void testIsPopOrder(){
+        int[] pushA = new int[]{1,2,3,4,5};
+        int[] popA = new int[]{4,3,5,1,2};
+        System.out.println(IsPopOrder(pushA,popA));
+    }
+
+    public int findNumber(int[] nums,int target){
+        for (int i = 0; i < nums.length; i++) {
+            if (nums[i] == target) return i;
+        }
+        return Integer.MAX_VALUE;
+    }
+    @Test
+    public void testFindNumber(){
+        int[] num = new int[]{1,2,3,4,5};
+        System.out.println(findNumber(num,3));
+    }
+    public ArrayList<Integer> PrintFromTopToBottom(TreeNode root) {
+        ArrayList<Integer> list = new ArrayList<>();
+        if (root == null) return list;
+        Queue<TreeNode> queue = new LinkedList<>();
+        queue.add(root);
+        while (!queue.isEmpty()){
+            int size = queue.size();
+            for (int i = 0; i < size; i++) {
+                TreeNode treeNode = queue.poll();
+                if (treeNode != null){
+                    list.add(treeNode.val);
+                    queue.add(treeNode.left);
+                    queue.add(treeNode.right);
+                }
+            }
+        }
+        return list;
+    }
+    @Test
+    public void testPrintFromTopToBottom(){
+        TreeNode root = new TreeNode(5);
+        TreeNode node1 = new TreeNode(4);
+        TreeNode node2 = new TreeNode(3);
+        TreeNode node3 = new TreeNode(2);
+        TreeNode node4 = new TreeNode(1);
+        root.left = node1;
+        node1.left = node2;
+        node2.left = node3;
+        node3.right = node4;
+        ArrayList<Integer> list = PrintFromTopToBottom(root);
+        System.out.println(list);
+
+    }
+
+    /**
+     * 二叉搜索树的后序遍历序列
+     * @param sequence 测试的数组
+     * @return 若是数的后续遍历，返回真，否则返回假。
+     */
+    public boolean VerifySquenceOfBST(int [] sequence) {
+        if (sequence == null || sequence.length == 0) return false;
+        return helpVerifySquenceOfBST(sequence,0,sequence.length-1);
+    }
+
+    /**
+     * 递归实现二叉搜索树的后序遍历序列
+     * @param sequence 测试的数组序列
+     * @param start 数组遍历的开始索引
+     * @param root 数的根节点
+     * @return 若是后序遍历，则返回真，否则返回假
+     */
+    private boolean helpVerifySquenceOfBST(int[] sequence ,int start,int root ){
+        if (start >= root) return true;
+        int i = start;
+        // 确认左右子树边界
+        for (;i < root;i++)
+            if (sequence[i] > sequence[root]) break;
+        // 确认右子树是否有小于节点的值
+        for (int j = i; j < root; j++)
+            if (sequence[j] < sequence[root]) return false;
+        return helpVerifySquenceOfBST(sequence,0,i-1) && helpVerifySquenceOfBST(sequence,i,root-1);
+    }
+    @Test
+    public void testVerifySquenceOfBST(){
+        int[] s = new int[]{4,8,6,12,16,14,10};
+        System.out.println(VerifySquenceOfBST(s));
+    }
+
+    private final ArrayList<Integer> FindPathList = new ArrayList<>();
+    private final ArrayList<ArrayList<Integer>> FindPathRes = new ArrayList<>();
+
+    /**
+     *
+     * 二叉树中和为某一值的路径
+     * @param root 根节点
+     * @param target 目标值
+     * @return 返回的路径集合
+     */
+    public ArrayList<ArrayList<Integer>> FindPath(TreeNode root,int target) {
+        if (root == null) return FindPathRes;
+        helpFindPath(root,target);
+        return FindPathRes;
+    }
+
+    /**
+     * 回溯解决二叉树中和为某一值的路径
+     * @param root 根节点
+     * @param target 目标值
+     */
+    private void helpFindPath(TreeNode  root,int target){
+        if (root == null) return;
+        // 递归到叶子节点
+        if (root.left == null && root.right == null){
+            if (root.val == target) {
+                // 找到目标路径
+                FindPathList.add(root.val);
+                FindPathRes.add(new ArrayList<>(FindPathList));
+                // 回溯
+                FindPathList.remove(FindPathList.size()-1);
+            }
+            return;
+        }
+        if (root.val > target) return;
+        FindPathList.add(root.val);
+        // 遍历左子树
+        helpFindPath(root.left,target - root.val);
+        // 遍历右子树
+        helpFindPath(root.right,target - root.val);
+        // 回溯
+        FindPathList.remove(FindPathList.size()-1);
+    }
+    @Test
+    public void testFindPath(){
+        TreeNode root = new TreeNode(10);
+        TreeNode node1 = new TreeNode(5);
+        TreeNode node2 = new TreeNode(12);
+        TreeNode node3 = new TreeNode(4);
+        TreeNode node4 = new TreeNode(7);
+        root.left = node1;
+        root.right = node2;
+        node1.left = node3;
+        node1.right = node4;
+        ArrayList<ArrayList<Integer>> lists = FindPath(root, 22);
+        System.out.println(lists);
     }
 }
