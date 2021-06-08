@@ -3,6 +3,9 @@ package 剑指offer;
 import org.junit.Test;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author : one者天下
@@ -1015,5 +1018,377 @@ public class Solution {
         node1.right = node4;
         ArrayList<ArrayList<Integer>> lists = FindPath(root, 22);
         System.out.println(lists);
+    }
+
+    /**
+     * @author one者天下
+     * 复杂链表
+     */
+    public static class RandomListNode {
+        int label;
+        RandomListNode next = null;
+        RandomListNode random = null;
+
+        RandomListNode(int label) {
+            this.label = label;
+        }
+    }
+
+    /**
+     * 复杂链表的深拷贝
+     * @param pHead 链表的头结点
+     * @return 返回拷贝后的链表的头结点
+     */
+    public RandomListNode Clone(RandomListNode pHead) {
+        if (pHead == null) return null;
+        RandomListNode head = new RandomListNode(pHead.label);
+
+        RandomListNode temp = pHead;
+        RandomListNode headTemp = head;
+
+        Map<RandomListNode,RandomListNode> map = new HashMap<>();
+
+        while (temp != null){
+            map.put(temp,new RandomListNode(temp.label));
+            temp = temp.next;
+        }
+
+        while (pHead != null){
+            headTemp.next = map.get(pHead.next);
+            headTemp.random = map.get(pHead.random);
+            headTemp = headTemp.next;
+            pHead = pHead.next;
+        }
+        return head;
+    }
+
+    private final List<TreeNode> convertList = new ArrayList<>();
+    /**
+     * 二叉搜索树与双向链表
+     * @param pRootOfTree 二叉搜索树的根节点
+     * @return 返回链表的头结点
+     */
+    public TreeNode Convert(TreeNode pRootOfTree) {
+        inorder(pRootOfTree);
+        for (int i = 0; i < convertList.size()-1; i++) {
+            TreeNode nodeLeft = convertList.get(i);
+            TreeNode nodeRight = convertList.get(i + 1);
+            nodeLeft.right = nodeRight;
+            nodeRight.left = nodeLeft;
+        }
+        return convertList.get(0);
+    }
+
+
+    private TreeNode inorderPass(TreeNode pRootOfTree){
+        if (pRootOfTree == null) return null;
+        TreeNode left = inorderPass(pRootOfTree.left);
+        TreeNode root = new TreeNode(pRootOfTree.val);
+        if (left != null)
+            left.right = root;
+        root.left = left;
+        TreeNode right = inorderPass(pRootOfTree.right);
+        root.right = right;
+        if (right != null)
+            right.left = root;
+        return root.right;
+    }
+
+    private void inorder(TreeNode pRootOfTree){
+        if (pRootOfTree == null) return;
+        inorder(pRootOfTree.left);
+        convertList.add(new TreeNode(pRootOfTree.val));
+        inorder(pRootOfTree.right);
+    }
+
+
+    @Test
+    public void testConvert(){
+        TreeNode root = new TreeNode(10);
+        TreeNode node1 = new TreeNode(6);
+        TreeNode node2 = new TreeNode(14);
+        TreeNode node3 = new TreeNode(4);
+        TreeNode node4 = new TreeNode(8);
+        TreeNode node5 = new TreeNode(12);
+        TreeNode node6 = new TreeNode(16);
+        root.left = node1;
+        root.right = node2;
+        node1.left = node3;
+        node1.right = node4;
+        node2.left = node5;
+        node2.right = node6;
+
+        TreeNode convert = Convert(root);
+
+        System.out.println(convert.val);
+        System.out.println(convert.left);
+        System.out.println(convert.right.val);
+
+    }
+
+    private final ArrayList<String> permutationList = new ArrayList<>();
+
+    /**
+     * 字符串的排列
+     * @param str
+     * @return
+     */
+    public ArrayList<String> Permutation(String str) {
+        if ("".equals(str) || str == null) return permutationList;
+        char[] chars = str.toCharArray();
+        Arrays.sort(chars);
+        boolean[] tag = new boolean[chars.length];
+        StringBuilder stringBuilder = new StringBuilder();
+        helpPermutation(chars,stringBuilder,tag);
+        return permutationList;
+    }
+    private void helpPermutation(char[] str,StringBuilder stringBuilder,boolean[] tag){
+        if (stringBuilder.length() == str.length){
+            permutationList.add(stringBuilder.toString());
+            return;
+        }
+        for (int i = 0; i < str.length; i++) {
+            if (i > 0 && str[i] == str[i-1] && tag[i-1]) continue;
+            if (!tag[i]){
+                stringBuilder.append(str[i]);
+                tag[i] = true;
+                helpPermutation(str,stringBuilder,tag);
+                stringBuilder.deleteCharAt(stringBuilder.length()-1);
+                tag[i] = false;
+            }
+
+        }
+    }
+    @Test
+    public void testHelpPermutation(){
+        char[] str = new char[]{'a','b','c'};
+        boolean[] tag = new boolean[str.length];
+        StringBuilder stringBuilder = new StringBuilder();
+        helpPermutation(str,stringBuilder,tag);
+        System.out.println(permutationList);
+    }
+    @Test
+    public void testPermutation(){
+        String str = "aab";
+        ArrayList<String> permutation = Permutation(str);
+        System.out.println(permutation);
+    }
+
+    /**
+     * 连续子数组的最大和
+     * @param array
+     * @return
+     */
+    public int FindGreatestSumOfSubArray(int[] array) {
+        if (array == null || array.length == 0) return 0;
+        if (array.length == 1) return array[0];
+        int[] dp = new int[array.length];
+        int res = Integer.MIN_VALUE;
+        dp[0] = array[0];
+        for (int i = 1; i < dp.length; i++) {
+            dp[i] = Math.max(dp[i-1] + array[i],array[i]);
+            res = Math.max(res,dp[i]);
+        }
+        return res;
+    }
+
+    /**
+     * 整数中1出现的次数（从1到n整数中1出现的次数）
+     * @param n
+     * @return
+     */
+    public int NumberOf1Between1AndN_Solution(int n) {
+        int base = 1;
+        int count = 0;
+        int num = n;
+        while (num != 0){
+            int curCount = num / 10 * base;
+            if (num % 10 == 1) curCount = curCount + (n % base) + 1;
+            if (num % 10 > 1) curCount = curCount + base;
+            num /= 10;
+            base *= 10;
+            count = count + curCount;
+        }
+        return count;
+    }
+
+    /**
+     * 拼接最小数
+     * @param numbers
+     * @return
+     */
+    public String PrintMinNumber(int [] numbers) {
+        if (numbers == null || numbers.length == 0) return "";
+        if (numbers.length == 1) return "" + numbers[0];
+        Arrays.sort(numbers);
+        long[] dp = new long[numbers.length];
+        dp[0] = numbers[0];
+        for (int i = 1; i < dp.length; i++) {
+            String one = "" + dp[i-1] + numbers[i];
+            String second = "" + numbers[i] + dp[i-1];
+            dp[i] = Math.min(Long.parseLong(one),Long.parseLong(second));
+        }
+        return "" + dp[dp.length-1];
+    }
+    @Test
+    public void testStringToInt(){
+        System.out.println(""+1+2);
+    }
+    @Test
+    public void testPrintMinNumber(){
+        int[] numbers = new int[]{3334,3,3333332};
+        String s = PrintMinNumber(numbers);
+        System.out.println(s);
+    }
+
+    /**
+     * 丑数
+     * @param index
+     * @return
+     */
+    public int GetUglyNumber_Solution(int index) {
+        if (index <= 0) return 0;
+        int pow2 = 0,pow3 = 0,pow5 = 0;
+        int[] res = new int[index];
+        res[0] = 1;
+        for (int i = 1; i < index; i++) {
+            res[i] = Math.min(res[pow2] * 2,Math.min(res[pow3] * 3,res[pow5] * 5));
+            if (res[i] == res[pow2] * 2) pow2++;
+            if (res[i] == res[pow3] * 3) pow3++;
+            if (res[i] == res[pow5] * 5) pow5++;
+        }
+        return res[index-1];
+    }
+    public int FirstNotRepeatingChar(String str) {
+        if (str == null || str.length() == 0) return -1;
+        int res = -1;
+        if (str.length() == 1) return 0;
+        Map<Character,Integer> map = new HashMap<>();
+        char[] chars = str.toCharArray();
+        for (char aChar : chars) {
+            if (map.containsKey(aChar)){
+                map.put(aChar,map.get(aChar) + 1);
+            }else map.put(aChar,1);
+        }
+        for (int i = 0; i < chars.length; i++) {
+            if (map.get(chars[i]) == 1) {
+                res = i;
+                break;
+            }
+        }
+        return res;
+    }
+    @Test
+    public void testFirstNotRepeatingChar(){
+        String str = "gbk";
+        int i = FirstNotRepeatingChar(str);
+        System.out.println(i);
+    }
+    public ListNode FindFirstCommonNode(ListNode pHead1, ListNode pHead2) {
+        if (pHead1 == null || pHead2 == null) return null;
+        Set<ListNode> set = new HashSet<>();
+        ListNode temp = pHead1;
+        ListNode res = null;
+        while (temp != null){
+            set.add(temp);
+            temp = temp.next;
+        }
+        temp = pHead2;
+        while (temp != null){
+            if (set.contains(temp)){
+                res = temp;
+                break;
+            }
+            temp = temp.next;
+        }
+        return res;
+    }
+    public int GetNumberOfK(int [] array , int k) {
+        Map<Integer,Integer> map = new HashMap<>();
+        for (int i : array) {
+            if (map.containsKey(i)) map.put(i,map.get(i)+1);
+            else map.put(i,1);
+        }
+        return map.getOrDefault(k, 0);
+    }
+    private int resTreeDepth = 0;
+    public int TreeDepth(TreeNode root) {
+        if (root == null) return 0;
+        helpTreeDepth(root,0);
+        return resTreeDepth;
+    }
+
+    private void helpTreeDepth(TreeNode root,int count){
+        if (root == null){
+            resTreeDepth = Math.max(resTreeDepth,count);
+            return;
+        }
+        helpTreeDepth(root.left,count+1);
+        helpTreeDepth(root.right,count+1);
+    }
+    @Test
+    public void testTreeDepth(){
+        TreeNode root = new TreeNode(1);
+        TreeNode node2 = new TreeNode(2);
+        TreeNode node3 = new TreeNode(3);
+        TreeNode node4 = new TreeNode(4);
+        TreeNode node5 = new TreeNode(5);
+        TreeNode node6 = new TreeNode(6);
+        TreeNode node7 = new TreeNode(7);
+        root.left = node2;
+        root.right = node3;
+        node2.left = node4;
+        node2.right = node5;
+        node3.right = node6;
+        node5.left = node7;
+//        node7.right = new TreeNode(8);
+        int i = TreeDepth(root);
+        System.out.println(i);
+    }
+    public boolean IsBalanced_Solution(TreeNode root) {
+        if (root == null) return true;
+        return IsBalanced_Solution(root.left) && IsBalanced_Solution(root.right)
+                && Math.abs(TreeHeight(root.left,0) - TreeHeight(root.right,0)) <= 1;
+    }
+    private int TreeHeight(TreeNode root,int count){
+        if (root == null) return count;
+        return Math.max(TreeHeight(root.left,count+1),TreeHeight(root.right,count+1));
+    }
+    @Test
+    public void testTreeHeight(){
+        TreeNode root = new TreeNode(1);
+        TreeNode node2 = new TreeNode(2);
+        TreeNode node3 = new TreeNode(3);
+        TreeNode node4 = new TreeNode(4);
+        TreeNode node5 = new TreeNode(5);
+        TreeNode node6 = new TreeNode(6);
+        TreeNode node7 = new TreeNode(7);
+        root.left = node2;
+        root.right = node3;
+        node2.left = node4;
+        node2.right = node5;
+        node3.right = node6;
+        node5.left = node7;
+        node7.right = new TreeNode(8);
+        System.out.println(TreeHeight(root,0));
+    }
+    @Test
+    public void testIsBalanced_Solution(){
+        TreeNode root = new TreeNode(1);
+        TreeNode node2 = new TreeNode(2);
+        TreeNode node3 = new TreeNode(3);
+        TreeNode node4 = new TreeNode(4);
+        TreeNode node5 = new TreeNode(5);
+        TreeNode node6 = new TreeNode(6);
+        TreeNode node7 = new TreeNode(7);
+        root.left = node2;
+        root.right = node3;
+        node2.left = node4;
+        node2.right = node5;
+        node3.right = node6;
+        node5.left = node7;
+        node7.right = new TreeNode(8);
+        boolean b = IsBalanced_Solution(root);
+        System.out.println(b);
     }
 }
