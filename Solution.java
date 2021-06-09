@@ -1391,4 +1391,131 @@ public class Solution {
         boolean b = IsBalanced_Solution(root);
         System.out.println(b);
     }
+
+    public int[] FindNumsAppearOnce (int[] array) {
+        Map<Integer,Integer> map = new HashMap<>();
+        for (int i : array) {
+            if (map.containsKey(i)){
+                map.put(i,map.get(i)+1);
+            }
+            else map.put(i,1);
+        }
+        int[] res = new int[2];
+        int count = 0;
+        for (int i : array) {
+            if (map.get(i) == 1) {
+                res[count] = i;
+                count++;
+            }
+        }
+        return res;
+    }
+
+    public ArrayList<ArrayList<Integer> > FindContinuousSequence(int sum) {
+        ArrayList<ArrayList<Integer>> res = new ArrayList<>();
+        if (sum <= 0 ) return res;
+        int left = 1;
+        int right = 2;
+        int count = left + right;
+        while (right <= (sum+1) >> 1){
+            if (count < sum){
+                right++;
+                count += right;
+            }else if (count > sum){
+                count -= left;
+                left++;
+            }else {
+                ArrayList<Integer> list = new ArrayList<>();
+                for (int i = left ; i <= right ; i++){
+                    list.add(i);
+                }
+                res.add(list);
+                count -= left;
+                left++;
+            }
+        }
+        return res;
+    }
+
+    @Test
+    public void testFindContinuousSequence(){
+        ArrayList<ArrayList<Integer>> arrayLists = FindContinuousSequence(100);
+        arrayLists.forEach(System.out::println);
+    }
+
+    public ArrayList<Integer> FindNumbersWithSum(int [] array,int sum) {
+        ArrayList<Integer> res = new ArrayList<>();
+        if (array == null || array.length == 0) return res;
+        Map<Integer,Integer> map = new HashMap<>();
+        int[] temp = new int[]{Integer.MAX_VALUE,Integer.MAX_VALUE};
+
+        int resCount = Integer.MAX_VALUE;
+        for (int i = 0; i < array.length; i++) {
+            map.put(array[i],i);
+        }
+        for (int item : array){
+            if (map.containsKey(sum-item)){
+                if (resCount > (sum-item) * item){
+                    resCount = (sum-item) * item;
+                    temp[0] = item;
+                    temp[1] = sum - item;
+                }
+            }
+        }
+        if (temp[0] != Integer.MAX_VALUE || temp[1] != Integer.MAX_VALUE){
+            res.add(temp[0]);
+            res.add(temp[1]);
+        }
+        return res;
+    }
+    public String LeftRotateString(String str,int n) {
+        if (str == null || str.length() == 0) return "";
+        if (n<=0) return str;
+        LinkedList<Character> queue = new LinkedList<>();
+        char[] chars = str.toCharArray();
+        for (char c : chars){
+            queue.add(c);
+        }
+        while (n > 0){
+            Character poll = queue.poll();
+            queue.addLast(poll);
+            n--;
+        }
+        String res = "";
+        while (!queue.isEmpty()){
+            res += queue.poll();
+        }
+        return res;
+    }
+
+    @Test
+    public void testLeftRotateString(){
+        String str = "nowcoder. a am I";
+        String s = LeftRotateString(str, 8);
+        System.out.println(s);
+    }
+    public String ReverseSentence(String str) {
+        if (str == null || str.length() == 0) return "";
+        if (str.charAt(str.length()-1) == '.') return str;
+        LinkedList<String> queue = new LinkedList<>();
+        String[] strs = str.split(" ");
+        Collections.addAll(queue, strs);
+        String res = "";
+        while (!queue.isEmpty()){
+            String s = queue.peekLast();
+            if (s.charAt(s.length()-1) != '.'){
+                res = res + queue.pollLast() + " ";
+            }else {
+                res = res + queue.pollFirst() + " ";
+            }
+        }
+        return res.substring(0,res.length()-1);
+    }
+    @Test
+    public void testReverseSentence(){
+        String str = "Gdut. from, student a am I";
+        String s = ReverseSentence(str);
+        System.out.println(s);
+        System.out.println(s.length() == str.length());
+    }
 }
