@@ -1706,4 +1706,81 @@ public class Solution {
             }
         },"B").start();
     }
+    public int[] LRU (int[][] operators, int k) {
+        // write code here
+        Map<Integer,Integer> map = new HashMap<>();
+        Stack<Integer> stack1 = new Stack<>();
+        Stack<Integer> stack2 = new Stack<>();
+        List<Integer> list = new ArrayList<>();
+        for (int[] arr : operators){
+            if (arr[0] == 1){
+                if (map.containsKey(arr[1]) && map.get(arr[1]) != -1){// 元素已经出现过并且没有被移除,则覆盖元素值
+                    map.put(arr[1],arr[2]);
+                    // 找到对应的元素key,将其置位最常使用
+                    while (!stack1.isEmpty() && stack1.peek() != arr[1]){
+                        stack2.push(stack1.pop());
+                    }
+                    // 找到了重复的元素key
+                    while (!stack2.isEmpty()) {
+                        stack1.push(stack2.pop());
+                    }
+                    stack1.push(arr[1]);
+
+                }else {// 元素第一次加入
+                    map.put(arr[1],arr[2]);
+                    if (stack1.size() < k) { // 元素个数没有超过k,直接push
+                        stack1.push(arr[1]);
+                    }else { // 移除最久没有使用的
+                        while (!stack1.isEmpty()){
+                            stack2.push(stack1.pop());
+                        }
+                        int key = stack2.pop();// 移除最久没有使用的元素
+                        map.put(key,-1);// 移除后元素值置-1
+                        while(!stack2.isEmpty()){
+                            stack1.push(stack2.pop());
+                        }
+                        stack1.push(arr[1]);
+                    }
+                }
+            }else {
+                // 获取一个元素key的值
+                // 没有出现过或已经被移除
+                if (!map.containsKey(arr[1]) || map.get(arr[1]) == -1){
+                    list.add(-1);
+                }
+                // 获取值,并将key置位常用
+                else {
+                    list.add(map.get(arr[1]));
+                    while (!stack1.isEmpty() && stack1.peek() != arr[1]){
+                        stack2.push(stack1.pop());
+                    }
+                    int temp = stack1.pop();
+                    while (!stack2.isEmpty()) {
+                        stack1.push(stack2.pop());
+                    }
+                    stack1.push(temp);
+                }
+            }
+        }
+        int[] res = new int[list.size()];
+        int i = 0;
+        for (int j : list){
+            res[i++] = j;
+        }
+        return res;
+    }
+    @Test
+    public void testLRU(){
+        int[][] arr = new int[][]{
+                {1,1,1},
+                {1,2,2},
+                {1,3,2},
+                {2,1},
+                {1,4,4},
+                {2,2}
+        };
+        int[] lru = LRU(arr, 3);
+        System.out.println(Arrays.toString(lru));
+
+    }
 }
