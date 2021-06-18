@@ -3,9 +3,6 @@ package 剑指offer;
 import org.junit.Test;
 
 import java.util.*;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author : one者天下
@@ -1517,5 +1514,196 @@ public class Solution {
         String s = ReverseSentence(str);
         System.out.println(s);
         System.out.println(s.length() == str.length());
+    }
+    public static void QuickSort(int[] arr, int left, int right){
+        int l = left;
+        int r = right;
+        int midValue = arr[(l+r)>>1];
+        while (l<r){
+            while (arr[l] < midValue) l++;
+            while (arr[r] > midValue) r--;
+            if (l >= r) break;
+            arr[l] = arr[r] ^ arr[l];
+            arr[r] = arr[r] ^ arr[l];
+            arr[l] = arr[r] ^ arr[l];
+            if (arr[l] == midValue) r--;
+            if (arr[r] == midValue) l++;
+        }
+        if (l == r){
+            l++;
+            r--;
+        }
+        if (left < r) QuickSort(arr,left,r);
+        if (l < right) QuickSort(arr,l,right);
+    }
+    @Test
+    public void testQuickSort(){
+        int[] arr = new int[]{2,1,4,3,1,45,32,42,11,34};
+        QuickSort(arr,0,arr.length-1);
+        System.out.println(Arrays.toString(arr));
+    }
+    private static void Merge(int[] arr,int left,int mid,int right,int[] temp){
+        int i = left;
+        int j = mid + 1;
+        int index = 0;
+        while (i <=mid && j <= right){
+            if (arr[i] > arr[j]) temp[index++] = arr[j++];
+            else temp[index++] = arr[i++];
+        }
+        while (i <= mid) temp[index++] = arr[i++];
+        while (j <= right) temp[index++] = arr[j++];
+
+        // 拷贝
+        index = 0;
+        int leftIndex = left;
+        while (leftIndex <= right) arr[leftIndex++] = temp[index++];
+    }
+    public static void MergeSort(int[] arr,int left,int right,int[] temp){
+        if (left < right){
+            int mid = (left + right) >> 1;
+            // 分解
+            MergeSort(arr,left,mid,temp);
+            MergeSort(arr,mid+1,right,temp);
+            // 合并
+            Merge(arr,left,mid,right,temp);
+        }
+    }
+    @Test
+    public void testMergeSort(){
+        int[] arr = new int[]{2,1,4,3,1,45,32,42,11,34};
+        int[] temp = new int[arr.length];
+        MergeSort(arr,0,arr.length-1,temp);
+        System.out.println(Arrays.toString(arr));
+    }
+    public static void BucketSort(int[] arr){
+        int[][] bucket = new int[10][arr.length];
+        int[] bucketCount = new int[arr.length];
+        int max = arr[0];
+        for (int i : arr) {
+            max = Math.max(max,i);
+        }
+        int MaxLength = (max+"").length();
+        for (int i = 0,n = 1; i < MaxLength; i++,n *= 10) {
+            for (int i1 : arr) {
+                int BucketIndex = i1 / n % 10;
+                bucket[BucketIndex][bucketCount[BucketIndex]++] = i1;
+            }
+            int index = 0;
+            for (int i1 = 0; i1 < bucket.length; i1++) {
+                if (bucketCount[i1] != 0){
+                    for (int i2 = 0; i2 < bucketCount[i1]; i2++) {
+                        arr[index++] = bucket[i1][i2];
+                    }
+                    bucketCount[i1] = 0;
+                }
+            }
+        }
+    }
+
+    @Test
+    public void testBucketSort(){
+        int[] arr = new int[]{2,1,4,3,1,45,32,42,11,34};
+        BucketSort(arr);
+        System.out.println(Arrays.toString(arr));
+    }
+
+    private static void adjustment(int[] arr,int i,int length){
+        int temp = arr[i];
+        for (int j = 2 * i + 1; j < length; j = 2 * j + 1) {
+            if (j+1 < length && arr[j] > arr[j+1]) j = j + 1;
+            if (arr[j] < temp){
+                arr[i] = arr[j];
+                i = j;
+            }else break;
+        }
+        arr[i] = temp;
+    }
+
+    public static void HeapSort(int[] arr){
+        // 构建大顶堆
+        for (int i = (arr.length>>1)-1; i >= 0 ; i--) {
+            adjustment(arr,i,arr.length);
+        }
+        for (int i = arr.length-1 ; i > 0 ; i--){
+            arr[i]  = arr[i] ^ arr[0];
+            arr[0]  = arr[i] ^ arr[0];
+            arr[i]  = arr[i] ^ arr[0];
+            adjustment(arr,0,i);
+        }
+    }
+
+    @Test
+    public void testHeapSort(){
+        int[] arr = new int[]{2,1,4,3,1,45,32,42,11,34};
+        HeapSort(arr);
+        System.out.println(Arrays.toString(arr));
+    }
+    // DCL单例模式
+    private static class LazyDemo{
+        private LazyDemo(){}
+        private static volatile LazyDemo lazyDemo = null;
+        public static LazyDemo getInstance(){
+            if (lazyDemo == null){
+                synchronized (LazyDemo.class){
+                    if (lazyDemo == null) lazyDemo = new LazyDemo();
+                }
+            }
+            return lazyDemo;
+        }
+    }
+    // 饿汉式
+    private static class Hungry{
+        private Hungry(){}
+        private static final Hungry hungry = new Hungry();
+        public static Hungry getInstance(){
+            return hungry;
+        }
+    }
+    // 枚举单例
+    private enum EnumerationSingleton{
+        ENUMERATION_SINGLETON;
+        public static EnumerationSingleton getInstance(){
+            return ENUMERATION_SINGLETON;
+        }
+    }
+    // 生产者消费者问题
+    private static class Producer_Consumer{
+        int num = 0;
+
+        public synchronized void increase() throws InterruptedException {
+            while (num != 0) this.wait();
+            num++;
+            System.out.println(Thread.currentThread().getName() + "-->" + num);
+            this.notifyAll();
+        }
+
+        public synchronized void cut() throws Exception{
+            while (num == 0) this.wait();
+            num--;
+            System.out.println(Thread.currentThread().getName() + "-->" + num);
+            this.notifyAll();
+        }
+    }
+
+    public static void main(String[] args) {
+        Producer_Consumer producer_consumer = new Producer_Consumer();
+        new Thread(()->{
+            try {
+                for (int i = 0; i < 10; i++) {
+                    producer_consumer.increase();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        },"A").start();
+        new Thread(()->{
+            try {
+                for (int i = 0; i < 10; i++) {
+                    producer_consumer.cut();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        },"B").start();
     }
 }
