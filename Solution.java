@@ -1783,4 +1783,283 @@ public class Solution {
         System.out.println(Arrays.toString(lru));
 
     }
+    public void maxSideLength(int[][] mat, int threshold){
+        int m = mat.length,n = mat[0].length;
+        int[][] dp = new int[m+1][n+1];
+        for (int i = 1; i < dp.length; i++) {
+            for (int j = 1; j <dp[0].length ; j++) {
+                dp[i][j] = mat[i-1][j-1] + dp[i-1][j] + dp[i][j-1] - dp[i-1][j-1];
+            }
+        }
+        for (int[] arr : dp){
+            System.out.println(Arrays.toString(arr));
+        }
+    }
+    @Test
+    public void testMaxSideLength(){
+        int[][] mat = new int[][]{
+                {1,2,3},
+                {4,5,6},
+                {7,8,9}
+        };
+        maxSideLength(mat,8);
+    }
+    public void printCoordinate(int m , int n){
+        boolean[][] tag = new boolean[m][n];
+        helpPrintCoordinate(m,n,0,0,tag);
+        for (Integer[] integers : CoordinateList) {
+            if (integers[0] > 300)
+            System.out.println(Arrays.toString(integers));
+        }
+    }
+    private final ArrayList<Integer[]> CoordinateList = new ArrayList<>();
+    private void helpPrintCoordinate(int m,int n,int i,int j,boolean[][] tag){
+        if (i >= m || j >= n || i < 0 || j < 0) return;
+        // 计算坐标(i,j)的矩阵和
+        int sum = 0;
+        // 获取i的位数
+        int li = (i+"").length();
+        // 获取j的位数
+        int lj = (j+"").length();
+        // 计算矩阵和
+        int count = 0;
+        int f  = i;
+        while (count < li){
+            sum += f % 10;
+            f /= 10;
+            count++;
+        }
+        count = 0;
+        f = j;
+        while (count < lj){
+            sum += f % 10;
+            f /= 10;
+            count++;
+        }
+        if (sum < 20){
+            CoordinateList.add(new Integer[]{i,j});
+            tag[i][j] = true;// 设置该坐标走过
+            if (i < m-1 && !tag[i+1][j]) helpPrintCoordinate(m,n,i+1,j,tag);
+            if (i > 0 && !tag[i-1][j]) helpPrintCoordinate(m,n,i-1,j,tag);
+            if (j > 0 && !tag[i][j-1]) helpPrintCoordinate(m,n,i,j-1,tag);
+            if (j < n-1 && !tag[i][j+1]) helpPrintCoordinate(m,n,i,j+1,tag);
+        }
+    }
+    @Test
+    public void testPrintCoordinate(){
+        printCoordinate(439,39);
+    }
+    @Test
+    public void test2(){
+        List<Integer> list = new ArrayList<>();
+        list.add(1);
+        list.add(1);
+        list.add(1);
+        list.add(1);
+        list.add(1);
+        Integer[] arr = new Integer[list.size()];
+        list.toArray(arr);
+        System.out.println(Arrays.toString(arr));
+    }
+    // 实现链表的反转
+    private ListNode re(ListNode head){
+        ListNode listHead = new ListNode(-1);
+        ListNode p = head;
+        while (p != null){
+            ListNode tempList = p.next;
+            p.next = listHead.next;
+            listHead.next = p;
+            p = tempList;
+        }
+        return listHead.next;
+    }
+    @Test
+    public void testRe(){
+        ListNode head = new ListNode(1);
+        head.next = new ListNode(2);
+        head.next.next = new ListNode(3);
+        ListNode listNode = re(head);
+        while (listNode != null){
+            System.out.println(listNode.val);
+            listNode = listNode.next;
+        }
+    }
+
+    public ListNode reverseKGroup (ListNode head, int k) {
+        // 获取链表的长度
+        ListNode temp = head;
+        int length = 0;
+        while (temp != null){
+            temp = temp.next;
+            length++;
+        }
+        ListNode p = head;
+        ListNode l = new ListNode(-1); // 创建一个伪头节点
+        l.next = head;
+        ListNode pre = l,cur = p;
+        for (int i = 0 ; i < length / k ; i++){// 计算循环次数
+            for (int j = 1 ; j < k ; j++){ // 开始循环反转局部的链表
+                p = cur.next;
+                cur.next = p.next;
+                p.next = pre.next;
+                pre.next = p;
+            }
+            pre = cur;
+            cur = cur.next;
+        }
+        return l.next;
+    }
+    @Test
+    public void testReverseKGroup(){
+        ListNode head = new ListNode(1);
+        head.next = new ListNode(2);
+        head.next.next = new ListNode(3);
+        reverseKGroup(head,3);
+    }
+    public String solve (String s, String t) {
+        // 先确定两个数的位数的长短
+        String bs = s.length() > t.length() ? s : t;
+        String ss = s.length() > t.length() ? t : s;
+        // 将字符串转化为字符数组，便于遍历与计算
+        char[] bc = bs.toCharArray();// 较长的数组
+        char[] sc = ss.toCharArray();// 较短的数组
+        // 倒序遍历较短数组，开始进位加法
+        int tag = 0; // 设置进位值。初始为0
+        // 使用一个数组记录加法的结果
+        int[] res = new int[bs.length() + 1];
+        int i = bc.length - 1 , j = ss.length() - 1;
+        for (; j >= 0 ; i--,j--){
+            int a = Integer.parseInt(bc[i] + "");
+            int b = Integer.parseInt(sc[j] + "");
+            int count = a + b + tag;
+            if (count >= 10){
+                count = count % 10;
+                tag = 1;
+            }else tag = 0;
+            res[i + 1] = count;
+        }
+        while (i >= 0){
+            int count = Integer.parseInt(bc[i] + "") + tag;
+            if (count >= 10){
+                count = count % 10;
+                tag = 1;
+            }else tag = 0;
+            res[i + 1] = count;
+            i--;
+        }
+        res[0] = tag;
+        StringBuilder builder = new StringBuilder();
+        for (int z = 0; z < res.length ; z++){
+            if (z == 0 && res[z] == 0) continue;
+            builder.append(res[z]);
+        }
+        return builder.toString();
+    }
+    @Test
+    public void testSolve(){
+        String s = solve("733064366", "459309139");
+        System.out.println(s);
+    }
+    public ListNode addInList (ListNode head1, ListNode head2) {
+        // 实现链表的相加
+        // 设置一个进位标志
+        int tag = 0;
+        // 反转链表
+        ListNode h1 = re1(head1);
+        ListNode h2 = re1(head2);
+        // 创建一个伪链表头节点
+        ListNode head = new ListNode(-1);
+        ListNode pre = null;
+        // 遍历两个链表
+        while (h1 != null && h2 != null){
+            // 获取当前节点的值
+            int v1 = h1.val;
+            int v2 = h2.val;
+            // 进行进位相加
+            int count = v1 + v2 + tag;
+            // 两节点值相加超过10的情况
+            if (count >= 10){
+                tag = 1;// 进位+1
+                count = count % 10;// 进行取模
+            }
+            // 创建当前的节点
+            ListNode cur = new ListNode(count);
+            // 进行头插操作
+            cur.next = pre;
+            head.next = cur;
+            pre = cur;
+            // 节点前移
+            h1 = h1.next;
+            h2 = h2.next;
+        }
+        // 将对长链表进行进位相加
+        while (h1 != null){
+            // 获取当前节点的值
+            int v1 = h1.val;
+            int count = v1 + tag;
+            if (count > 9){
+                tag = 1;
+                count  = count % 10;
+            }
+            ListNode cur = new ListNode(count);
+            // 进行头插操作
+            cur.next = pre;
+            head.next = cur;
+            pre = cur;
+            // 节点前移
+            h1 = h1.next;
+        }
+        while (h2 != null){
+            // 获取当前节点的值
+            int v2 = h2.val;
+            int count = v2 + tag;
+            if (count > 9){
+                tag = 1;
+                count  = count % 10;
+            }
+            ListNode cur = new ListNode(count);
+            // 进行头插操作
+            cur.next = pre;
+            head.next = cur;
+            pre = cur;
+            // 节点前移
+            h2 = h2.next;
+        }
+        if (tag == 1){
+            ListNode cur = new ListNode(tag);
+            cur.next = pre;
+            head.next = cur;
+            pre = cur;
+        }
+        return head.next;
+    }
+    // 实现链表的反转
+    private ListNode re1(ListNode head){
+        // 创建一个伪头节点
+        ListNode l = new ListNode(-1);
+//        l.next = head;
+        // 遍历节点的前一个节点
+//        ListNode pre = null;
+        // 当前遍历的节点
+        ListNode cur = head;
+        while (cur != null){
+            ListNode pre = cur.next;
+            cur.next = l.next;
+            l.next = cur;
+            cur = pre;
+        }
+        return l.next;
+    }
+    @Test
+    public void testAddInList(){
+        ListNode head1 = new ListNode(9);
+        head1.next = new ListNode(3);
+        head1.next.next = new ListNode(7);
+//        re1(head1);
+        ListNode head2 = new ListNode(6);
+        head2.next = new ListNode(3);
+        ListNode head = addInList(head1, head2);
+        System.out.println(head.val);
+    }
+
 }
