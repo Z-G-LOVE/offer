@@ -2,6 +2,10 @@ package com.coding;
 
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Stack;
+
 /**
  * @作者: Administrator
  * @时间: 2021/7/12 22:39
@@ -17,15 +21,16 @@ public class NiuKeSolution {
     public int solve (String s) {
         return 0;
     }
-
-    public int NumberToSum(char num1,char num2,char ope){
-        int number1 = Integer.parseInt(num1+"");
-        int number2 = Integer.parseInt(num2+"");
-        return switch (ope) {
-            case '*' -> number1 * number2;
-            case '+' -> number1 + number2;
-            case '-' -> number1 - number2;
-            default -> Integer.MAX_VALUE;
-        };
+/*    public List<String> classification(String s){
+        List<String> ex = new ArrayList<>();
+        int bi = 0,ai = 0;// 设置前置索引和后置索引
+        while (ai < s.length()){
+            while (isNum(s.charAt(ai)))ai++;
+            ex.add(s.substring(bi,ai));
+            bi = ai;
+        }
+    }*/
+    private boolean isNum(char s){
+        return !(s == '-' || s == '+' || s == '*' || s == ')' || s == '(');
     }
 }
