@@ -2,6 +2,7 @@ package com.coding;
 
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 
@@ -21,4 +22,12 @@ public class NiuKeSolutionTest {
         int[] lis = solution.LIS(arr);
         System.out.println(Arrays.toString(lis));
     }
+
+    @Test
+    public void threeSum(){
+        int[] num = {-2,0,1,1,2};
+        ArrayList<ArrayList<Integer>> arrayLists = solution.threeSum(num);
+        System.out.println(arrayLists);
+    }
+
 }
