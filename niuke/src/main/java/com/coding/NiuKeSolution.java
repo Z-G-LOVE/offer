@@ -1,6 +1,8 @@
 package com.coding;
 
+import com.coding.结构.TreeNode;
 import org.springframework.stereotype.Component;
+
 
 import java.util.*;
 
@@ -126,4 +128,111 @@ public class NiuKeSolution {
         return res;
     }
 
+    /**
+     * 记录中序遍历数组的位置
+     * key:中序遍历的值
+     * value：中序遍历的值的索引位置
+     */
+    private final Map<Integer,Integer> RCBTmap = new HashMap<>();
+    /**
+     * 根据前序遍历数组和中序遍历数组构建一颗二叉树
+     * @param pre 前序遍历的数组
+     * @param in 中序遍历的数组
+     * @return 返回二叉树的根节点
+     */
+    public TreeNode reConstructBinaryTree(int [] pre, int [] in) {
+        for (int i = 0; i < in.length; i++) {
+            RCBTmap.put(in[i],i);
+        }
+        return helpReConstructBinaryTree(pre,0,pre.length,0);
+    }
+
+    /**
+     * 根据前序遍历数组和中序遍历数组递归构建一颗二叉树
+     * @param pre 前序遍历的数组
+     * @param preStart 前序遍历的起始位置
+     * @param preEnd 前序遍历的结束位置
+     * @param inStart 中序遍历的起始位置
+     * @return 返回每次构造的子树的父节点
+     */
+    private TreeNode helpReConstructBinaryTree(int[] pre ,int preStart,int preEnd,int inStart){
+        if (preStart == preEnd) return null;
+        int rootValue = pre[preStart];
+        TreeNode root = new TreeNode(rootValue);
+        int rootIndex = RCBTmap.get(rootValue);// 获取当前节点在中序遍历数组中的位置
+        int preCount = rootIndex - inStart;// 计算左子树的个数
+        root.left = helpReConstructBinaryTree(pre,preStart+1,preStart + preCount + 1,inStart);
+        root.right = helpReConstructBinaryTree(pre,preStart+preCount+1,preEnd,rootIndex+1);
+        return root;
+    }
+
+    /**
+     * 根据前序遍历和中序遍历数组构造一个二叉树，并输出它的右视图
+     * @param xianxu 前序遍历数组
+     * @param zhongxu 中序遍历数组
+     * @return 返回构造后的二叉树的右视图
+     */
+    public int[] solve (int[] xianxu, int[] zhongxu) {
+        for (int i = 0; i < zhongxu.length; i++) {
+            RCBTmap.put(zhongxu[i],i);
+        }
+        TreeNode root = helpReConstructBinaryTree(xianxu,0,xianxu.length,0);
+        LinkedList<TreeNode> queue = new LinkedList<>();
+        queue.add(root);
+        ArrayList<Integer> list = new ArrayList<>();
+        while (!queue.isEmpty()){
+            int size = queue.size();
+            list.add(queue.peekLast().val);
+            for (int i = 0; i < size; i++) {
+                TreeNode node = queue.pop();
+                if (node.left != null) queue.add(node.left);
+                if (node.right != null) queue.add(node.right);
+            }
+        }
+        int[] res = new int[list.size()];
+        int index = 0;
+        for (Integer integer : list) {
+            res[index++] = integer;
+        }
+        return res;
+    }
+
+    /**
+     * 岛屿数量
+     * @param grid 地图
+     * @return 返回该地图中岛屿的数量
+     */
+    public int solve (char[][] grid) {
+        if (grid == null || grid.length == 0) return 0;
+        int rowCount = grid.length,col = grid[0].length;
+        int res = 0;
+        for (int i = 0; i < rowCount; i++) {
+            for (int i1 = 0; i1 < col; i1++) {
+                if (grid[i][i1] == '1'){
+                    res++;
+                    dfsSolve(grid,i,i1);
+                }
+            }
+        }
+        return res;
+    }
+
+    /**
+     * 深度优先遍历岛屿，将连通的岛屿一次遍历完
+     * @param grid 地图
+     * @param row 坐标
+     * @param col 坐标
+     */
+    private void dfsSolve(char[][] grid ,int row, int col){
+        int rowCount = grid.length;
+        int colCount = grid[0].length;
+        // 设置边界
+        if (row < 0 || col < 0 || row >= rowCount || col >= colCount || grid[row][col] != '1') return;
+        // 表示已遍历
+        grid[row][col] = '2';
+        dfsSolve(grid,row+1,col);
+        dfsSolve(grid,row-1,col);
+        dfsSolve(grid,row,col-1);
+        dfsSolve(grid,row,col+1);
+    }
 }
