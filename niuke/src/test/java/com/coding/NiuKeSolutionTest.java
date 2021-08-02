@@ -29,5 +29,17 @@ public class NiuKeSolutionTest {
         ArrayList<ArrayList<Integer>> arrayLists = solution.threeSum(num);
         System.out.println(arrayLists);
     }
-
+    @Test
+    public void maxWater(){
+        int[] arr = {4,5,1,3,2};
+        long l = solution.maxWater(arr);
+        System.out.println(l);
+    }
+    @Test
+    public void LCS(){
+        String s1 = "abc";
+        String s2 = "abc";
+        String lcs = solution.LCS(s1, s2);
+        System.out.println(lcs);
+    }
 }

@@ -33,6 +33,12 @@ public class NiuKeSolution {
     private boolean isNum(char s){
         return !(s == '-' || s == '+' || s == '*' || s == ')' || s == '(');
     }
+
+    /**
+     * 最长递增子序列
+     * @param arr 数组
+     * @return 返回最长递增子序列
+     */
     public int[] LIS (int[] arr) {
         // 创建两个数组
         int[] nums = new int[arr.length];// 记录arr的每一个元素的位置
@@ -234,5 +240,90 @@ public class NiuKeSolution {
         dfsSolve(grid,row-1,col);
         dfsSolve(grid,row,col-1);
         dfsSolve(grid,row,col+1);
+    }
+
+    /**
+     * 接水问题
+     * @param arr 水柱
+     * @return 返回接水的最大容量
+     */
+    public long maxWater (int[] arr) {
+//        if (arr == null || arr.length <= 2) return 0;
+//        int res = 0;
+//        int log = 0;
+//        for (int i = 0; i < arr.length-1; i++) {
+//            int j = i+1;
+////            if (j == arr.length-1) break;
+//            for (; j < arr.length; j++) {
+//                if (arr[i] > arr[j]) {
+//                    log += arr[j];
+//                }
+//                if (arr[i] <= arr[j]){
+//                    if (j - i == 1){
+//                        i = j;
+//                        log = 0;
+//                    }else {
+//                        int height = Math.min(arr[i],arr[j]);
+//                        res += height * (j-i-1)-log;
+//                        i = j;
+//                        log = 0;
+//                    }
+//
+//                }
+//            }
+//            if (j == arr.length) break;
+//        }
+//        return res;
+        if (arr == null || arr.length <= 2) return 0;
+        int left = 0,right = arr.length-1;
+        int mark = Math.min(arr[left],arr[right]);// 找水位，左右最小的作为水位
+        long res = 0;
+        while (left < right){
+            // 左边高要从右边遍历
+            if (arr[left] > arr[right]){
+                right--;
+                if (arr[right] > mark) mark = Math.min(arr[right],arr[left]); // 更新水位
+                else res += mark - arr[right];// 计算水量
+            }else {
+                left++;
+                if (arr[left] > mark) mark = Math.min(arr[left],arr[right]); // 更新水位
+                else res += mark - arr[left];
+            }
+        }
+        return res;
+    }
+
+    /**
+     * 最长公共子序列
+     * @param s1 字符串1
+     * @param s2 字符串2
+     * @return 两个字符串的最长公共子序列
+     */
+    public String LCS (String s1, String s2) {
+        if (s1 == null || s2 == null || s1.length() == 0 || s2.length() == 0) return "-1";
+        // 构造出两个字符串的最长公共子序列的dp数组
+        int[][] dp = new int[s1.length()+1][s2.length()+1];// dp[i][j] 表示字符串s1[0...i]与字符串s2[0...j]的最长公共子序列的长度
+        // 初始化dp
+        for (int i = 0; i < dp.length; i++) {
+            for (int j = 0; j < dp[0].length; j++) {
+                if (i == 0 || j == 0 ) dp[i][j] = 0;// 初始化
+                else if (s1.charAt(i-1) == s2.charAt(j-1)) dp[i][j] = dp[i-1][j-1] + 1;
+                else dp[i][j] = Math.max(dp[i-1][j],dp[i][j-1]);
+            }
+        }
+        StringBuilder stringBuilder = new StringBuilder();
+        // 根据构造的dp数组找出最长公共子序列，根据状态转移方程逆推
+        int row = s1.length(),col = s2.length();
+        while (row > 0 && col > 0){
+            if (s1.charAt(row-1) == s2.charAt(col-1)){
+                // 相等就添加，并且坐标向上对角线移动
+                stringBuilder.append(s1.charAt(row-1));
+                row--;
+                col--;
+            }else if (dp[row-1][col] > dp[row][col-1]) row--;
+            else col--;
+        }
+        if (stringBuilder.length() == 0) return "-1";
+        return stringBuilder.reverse().toString();
     }
 }
